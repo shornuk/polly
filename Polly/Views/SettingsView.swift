@@ -32,7 +32,17 @@ struct SettingsView: View {
                 } header: {
                     Text("Notifications")
                 } footer: {
-                    Text("Polly uses notifications to remind you before policies renew.")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Polly uses notifications to remind you before policies renew.")
+                        if !notificationManager.permissionGranted {
+                            Button("Open Notification Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .font(.footnote)
+                        }
+                    }
                 }
 
                 // MARK: - Debug

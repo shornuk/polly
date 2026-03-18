@@ -55,7 +55,7 @@ struct DashboardView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Polly")
+            .navigationTitle("Home")
             .background(Color(.systemGroupedBackground))
         }
     }
@@ -121,7 +121,7 @@ struct DashboardView: View {
 
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Upcoming Renewals", systemImage: "clock.fill")
+            Text("Upcoming Renewals")
                 .font(.headline)
                 .foregroundStyle(.primary)
 

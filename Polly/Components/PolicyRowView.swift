@@ -61,16 +61,24 @@ struct PolicyRowView: View {
     @ViewBuilder
     private func renewalBadge(days: Int) -> some View {
         if days < 0 {
-            Label("Overdue", systemImage: "exclamationmark.circle.fill")
-                .font(.caption)
-                .foregroundStyle(.red)
+            Text("Overdue")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else if days == 0 {
+            Text("Renews today")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else if days == 1 {
+            Text("Renews tomorrow")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         } else if days <= 30 {
-            Label("Renews in \(days) days", systemImage: "clock.fill")
-                .font(.caption)
-                .foregroundStyle(.orange)
+            Text("Renews in \(days) days")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         } else if days <= 90 {
-            Label("Renews in \(days) days", systemImage: "clock")
-                .font(.caption)
+            Text("Renews in \(days) days")
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
     }
