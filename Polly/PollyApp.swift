@@ -2,19 +2,28 @@
 //  PollyApp.swift
 //  Polly
 //
-//  Created by Sean on 18/03/2026.
-//
 
 import SwiftUI
 import SwiftData
 
 @main
 struct PollyApp: App {
+    @StateObject private var notificationManager = NotificationManager.shared
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Policy.self,
+            PolicyCostRecord.self,
+            PolicyDocument.self,
+            Driver.self,
+            Vehicle.self,
+            InsuredProperty.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -26,6 +35,10 @@ struct PollyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(notificationManager)
+                .task {
+                    await notificationManager.requestPermission()
+                }
         }
         .modelContainer(sharedModelContainer)
     }
