@@ -63,7 +63,9 @@ struct PolicyFormView: View {
                 notesSection
             }
             .navigationTitle(title)
+            #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -143,7 +145,9 @@ struct PolicyFormView: View {
                 Text("£")
                     .foregroundStyle(.secondary)
                 TextField("Amount", text: $cost)
+                    #if !os(macOS)
                     .keyboardType(.decimalPad)
+                    #endif
             }
             Picker("Frequency", selection: $frequency) {
                 ForEach(Frequency.allCases, id: \.self) { freq in
@@ -155,7 +159,9 @@ struct PolicyFormView: View {
                     Text("Payments per year")
                     Spacer()
                     TextField("e.g. 10", text: $paymentsPerYear)
+                        #if !os(macOS)
                         .keyboardType(.numberPad)
+                        #endif
                         .multilineTextAlignment(.trailing)
                         .frame(width: 60)
                 }

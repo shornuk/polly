@@ -36,9 +36,15 @@ struct SettingsView: View {
                         Text("Polly uses notifications to remind you before policies renew.")
                         if !notificationManager.permissionGranted {
                             Button("Open Notification Settings") {
+                                #if os(macOS)
+                                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+                                    NSWorkspace.shared.open(url)
+                                }
+                                #else
                                 if let url = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(url)
                                 }
+                                #endif
                             }
                             .font(.footnote)
                         }

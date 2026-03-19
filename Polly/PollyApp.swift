@@ -9,6 +9,7 @@ import SwiftData
 @main
 struct PollyApp: App {
     @StateObject private var notificationManager = NotificationManager.shared
+    @StateObject private var entitlementManager = EntitlementManager.shared
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -36,6 +37,7 @@ struct PollyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(notificationManager)
+                .environmentObject(entitlementManager)
                 .task {
                     await notificationManager.requestPermission()
                 }

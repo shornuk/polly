@@ -6,6 +6,23 @@
 import SwiftUI
 import SwiftData
 
+private extension Color {
+    static var systemGroupedBackground: Color {
+        #if os(macOS)
+        Color(NSColor.windowBackgroundColor)
+        #else
+        Color(.systemGroupedBackground)
+        #endif
+    }
+    static var secondarySystemGroupedBackground: Color {
+        #if os(macOS)
+        Color(NSColor.controlBackgroundColor)
+        #else
+        Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+}
+
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allPolicies: [Policy]
@@ -56,7 +73,7 @@ struct DashboardView: View {
                 .padding()
             }
             .navigationTitle("Home")
-            .background(Color(.systemGroupedBackground))
+            .background(Color.systemGroupedBackground)
         }
     }
 
@@ -94,7 +111,7 @@ struct DashboardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.secondarySystemGroupedBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -172,7 +189,7 @@ struct DashboardView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding(12)
-                    .background(Color(.secondarySystemGroupedBackground))
+                    .background(Color.secondarySystemGroupedBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
@@ -249,7 +266,7 @@ struct DashboardPolicyCard: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.secondarySystemGroupedBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

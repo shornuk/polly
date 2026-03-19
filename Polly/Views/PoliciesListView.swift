@@ -8,11 +8,14 @@ import SwiftData
 
 struct PoliciesListView: View {
     @State private var showingAddSheet = false
+    @State private var showingArchived = false
     @Environment(\.modelContext) private var modelContext
     @Query private var allPolicies: [Policy]
 
     private var policies: [Policy] {
-        allPolicies.filter { $0.isActive }
+        allPolicies
+            .filter { showingArchived ? !$0.isActive : $0.isActive }
+            .sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
     }
 
     var body: some View {
@@ -24,13 +27,28 @@ struct PoliciesListView: View {
                     list
                 }
             }
-            .navigationTitle("Policies")
+            .navigationTitle(showingArchived ? "Archived" : "Policies")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: {
+                    #if os(macOS)
+                    return .navigation
+                    #else
+                    return .topBarLeading
+                    #endif
+                }()) {
                     Button {
-                        showingAddSheet = true
+                        showingArchived.toggle()
                     } label: {
-                        Label("Add Policy", systemImage: "plus")
+                        Label("Archived", systemImage: showingArchived ? "archivebox.fill" : "archivebox")
+                    }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    if !showingArchived {
+                        Button {
+                            showingAddSheet = true
+                        } label: {
+                            Label("Add Policy", systemImage: "plus")
+                        }
                     }
                 }
             }
@@ -49,34 +67,60 @@ struct PoliciesListView: View {
                     PolicyDetailView(policy: policy)
                 } label: {
                     PolicyRowView(policy: policy)
+                        .opacity(showingArchived ? 0.65 : 1.0)
+                }
+                .swipeActions(edge: .leading) {
+                    if showingArchived {
+                        Button {
+                            restorePolicy(policy)
+                        } label: {
+                            Label("Restore", systemImage: "arrow.uturn.backward")
+                        }
+                        .tint(.green)
+                    }
                 }
             }
         }
+        #if os(macOS)
+        .listStyle(.inset)
+        #else
         .listStyle(.insetGrouped)
+        #endif
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "list.bullet.rectangle")
+            Image(systemName: showingArchived ? "archivebox" : "list.bullet.rectangle")
                 .font(.system(size: 56))
                 .foregroundStyle(.secondary)
-            Text("No Policies Yet")
+            Text(showingArchived ? "No Archived Policies" : "No Policies Yet")
                 .font(.title2)
                 .fontWeight(.semibold)
-            Text("Add your household bills and policies\nto keep track of renewals and costs.")
+            Text(showingArchived
+                 ? "Policies you archive will appear here. You can restore them at any time."
+                 : "Add your household bills and policies\nto keep track of renewals and costs.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button {
-                showingAddSheet = true
-            } label: {
-                Label("Add Your First Policy", systemImage: "plus")
+            if !showingArchived {
+                Button {
+                    showingAddSheet = true
+                } label: {
+                    Label("Add Your First Policy", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
         }
         .padding()
+    }
+
+    // MARK: - Restore
+
+    private func restorePolicy(_ policy: Policy) {
+        policy.isActive = true
+        policy.endedAt = nil
     }
 }
 
