@@ -18,6 +18,31 @@ struct PolicyDetailView: View {
     @EnvironmentObject private var notificationManager: NotificationManager
 
     @State private var showingEditSheet = false
+    @State private var showingRenewalSheet = false
+
+    // MARK: - Archive
+    @State private var showingArchiveConfirmation = false
+
+    // MARK: - Document Pickers
+    @State private var showingFilePicker = false
+    @State private var showingPhotoPicker = false
+    @State private var selectedPhotoItem: PhotosPickerItem?
+
+    // MARK: - Pending document (between picker and label alert)
+    @State private var pendingData: Data?
+    @State private var pendingLabel: String = ""
+    @State private var pendingFileType: FileType = .pdf
+
+    // MARK: - Label Alert
+    @State private var showingLabelAlert = false
+
+    // MARK: - Viewer
+    @State private var previewURL: URL?
+
+    // MARK: - Delete Confirmation
+    @State private var documentToDelete: PolicyDocument?
+
+    // MARK: - Body
 
     // MARK: - Archive
     @State private var showingArchiveConfirmation = false
@@ -51,11 +76,31 @@ struct PolicyDetailView: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Edit") { showingEditSheet = true }
+                    if policy.renewalDate != nil {
+                        Menu {
+                            Button {
+                                showingRenewalSheet = true
+                            } label: {
+                                Label("Renew Policy", systemImage: "arrow.clockwise")
+                            }
+                            Button {
+                                showingEditSheet = true
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                    } else {
+                        Button("Edit") { showingEditSheet = true }
+                    }
                 }
             }
             .sheet(isPresented: $showingEditSheet) {
                 PolicyFormView(mode: .edit(policy))
+            }
+            .sheet(isPresented: $showingRenewalSheet) {
+                PolicyRenewalView(policy: policy)
             }
             .fileImporter(
                 isPresented: $showingFilePicker,
@@ -281,6 +326,11 @@ struct PolicyDetailView: View {
                 Text(record.frequency.rawValue)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let note = record.note, !note.isEmpty {
+                    Text(note)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
