@@ -33,9 +33,19 @@ struct PoliciesListView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
+                Picker("Filter", selection: $filter) {
+                    ForEach(PolicyFilter.allCases, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+
                 if policies.isEmpty {
                     emptyState
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     list
                 }
@@ -45,15 +55,6 @@ struct PoliciesListView: View {
             .navigationBarTitleDisplayMode(.large)
             #endif
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("Filter", selection: $filter) {
-                        ForEach(PolicyFilter.allCases, id: \.self) { tab in
-                            Text(tab.rawValue).tag(tab)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(maxWidth: 280)
-                }
                 ToolbarItem(placement: .primaryAction) {
                     if filter == .active {
                         Button {
