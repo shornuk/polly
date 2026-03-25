@@ -6,16 +6,29 @@
 import SwiftUI
 import SwiftData
 
+private enum PolicyFilter: String, CaseIterable {
+    case active   = "Active"
+    case upcoming = "Upcoming"
+    case archived = "Archived"
+}
+
 struct PoliciesListView: View {
+    @State private var filter: PolicyFilter = .active
     @State private var showingAddSheet = false
-    @State private var showingArchived = false
     @Environment(\.modelContext) private var modelContext
     @Query private var allPolicies: [Policy]
 
     private var policies: [Policy] {
-        allPolicies
-            .filter { showingArchived ? !$0.isActive : $0.isActive }
-            .sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
+        let filtered: [Policy]
+        switch filter {
+        case .active:
+            filtered = allPolicies.filter { $0.isActive && !$0.isUpcoming }
+        case .upcoming:
+            filtered = allPolicies.filter { $0.isUpcoming }
+        case .archived:
+            filtered = allPolicies.filter { !$0.isActive }
+        }
+        return filtered.sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
     }
 
     var body: some View {
@@ -27,23 +40,22 @@ struct PoliciesListView: View {
                     list
                 }
             }
-            .navigationTitle(showingArchived ? "Archived" : "Policies")
+            .navigationTitle("Policies")
+            #if !os(macOS)
+            .navigationBarTitleDisplayMode(.large)
+            #endif
             .toolbar {
-                ToolbarItem(placement: {
-                    #if os(macOS)
-                    return .navigation
-                    #else
-                    return .topBarLeading
-                    #endif
-                }()) {
-                    Button {
-                        showingArchived.toggle()
-                    } label: {
-                        Label("Archived", systemImage: showingArchived ? "archivebox.fill" : "archivebox")
+                ToolbarItem(placement: .principal) {
+                    Picker("Filter", selection: $filter) {
+                        ForEach(PolicyFilter.allCases, id: \.self) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 280)
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    if !showingArchived {
+                    if filter == .active {
                         Button {
                             showingAddSheet = true
                         } label: {
@@ -67,10 +79,10 @@ struct PoliciesListView: View {
                     PolicyDetailView(policy: policy)
                 } label: {
                     PolicyRowView(policy: policy)
-                        .opacity(showingArchived ? 0.65 : 1.0)
+                        .opacity(filter == .archived ? 0.65 : 1.0)
                 }
                 .swipeActions(edge: .leading) {
-                    if showingArchived {
+                    if filter == .archived {
                         Button {
                             restorePolicy(policy)
                         } label: {
@@ -92,19 +104,17 @@ struct PoliciesListView: View {
 
     private var emptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: showingArchived ? "archivebox" : "list.bullet.rectangle")
+            Image(systemName: emptyIcon)
                 .font(.system(size: 56))
                 .foregroundStyle(.secondary)
-            Text(showingArchived ? "No Archived Policies" : "No Policies Yet")
+            Text(emptyTitle)
                 .font(.title2)
                 .fontWeight(.semibold)
-            Text(showingArchived
-                 ? "Policies you archive will appear here. You can restore them at any time."
-                 : "Add your household bills and policies\nto keep track of renewals and costs.")
+            Text(emptyMessage)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            if !showingArchived {
+            if filter == .active {
                 Button {
                     showingAddSheet = true
                 } label: {
@@ -116,7 +126,34 @@ struct PoliciesListView: View {
         .padding()
     }
 
-    // MARK: - Restore
+    private var emptyIcon: String {
+        switch filter {
+        case .active:   return "list.bullet.rectangle"
+        case .upcoming: return "calendar.badge.clock"
+        case .archived: return "archivebox"
+        }
+    }
+
+    private var emptyTitle: String {
+        switch filter {
+        case .active:   return "No Active Policies"
+        case .upcoming: return "No Upcoming Policies"
+        case .archived: return "No Archived Policies"
+        }
+    }
+
+    private var emptyMessage: String {
+        switch filter {
+        case .active:
+            return "Add your household bills and policies\nto keep track of renewals and costs."
+        case .upcoming:
+            return "Policies you've renewed in advance will appear here\nuntil their start date arrives."
+        case .archived:
+            return "Policies you archive will appear here.\nYou can restore them at any time."
+        }
+    }
+
+    // MARK: - Actions
 
     private func restorePolicy(_ policy: Policy) {
         policy.isActive = true

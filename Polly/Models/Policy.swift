@@ -112,4 +112,11 @@ final class Policy {
     var displayName: String {
         nickname ?? provider
     }
+
+    /// True when the policy is active but its start date is in the future
+    var isUpcoming: Bool {
+        guard isActive else { return false }
+        guard let startDate else { return false }
+        return startDate > Calendar.current.startOfDay(for: Date())
+    }
 }
