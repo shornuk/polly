@@ -44,30 +44,6 @@ struct PolicyDetailView: View {
 
     // MARK: - Body
 
-    // MARK: - Archive
-    @State private var showingArchiveConfirmation = false
-
-    // MARK: - Document Pickers
-    @State private var showingFilePicker = false
-    @State private var showingPhotoPicker = false
-    @State private var selectedPhotoItem: PhotosPickerItem?
-
-    // MARK: - Pending document (between picker and label alert)
-    @State private var pendingData: Data?
-    @State private var pendingLabel: String = ""
-    @State private var pendingFileType: FileType = .pdf
-
-    // MARK: - Label Alert
-    @State private var showingLabelAlert = false
-
-    // MARK: - Viewer
-    @State private var previewURL: URL?
-
-    // MARK: - Delete Confirmation
-    @State private var documentToDelete: PolicyDocument?
-
-    // MARK: - Body
-
     var body: some View {
         policyList
             .navigationTitle(policy.displayName)
