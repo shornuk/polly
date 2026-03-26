@@ -166,14 +166,7 @@ struct DashboardView: View {
                     PolicyDetailView(policy: policy)
                 } label: {
                     HStack(spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(policy.category.color.gradient)
-                                .frame(width: 40, height: 40)
-                            Image(systemName: policy.category.icon)
-                                .font(.system(size: 18))
-                                .foregroundStyle(.white)
-                        }
+                        PolicyIconView(policy: policy, size: 40)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(policy.displayName)
                                 .font(.subheadline)
@@ -205,14 +198,7 @@ struct DashboardPolicyCard: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(policy.category.color.gradient)
-                    .frame(width: 44, height: 44)
-                Image(systemName: policy.category.icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white)
-            }
+            PolicyIconView(policy: policy)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(policy.displayName)

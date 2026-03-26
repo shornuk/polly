@@ -147,14 +147,7 @@ struct PolicyDetailView: View {
     private var headerSection: some View {
         Section {
             HStack(spacing: 16) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(policy.category.color.gradient)
-                        .frame(width: 60, height: 60)
-                    Image(systemName: policy.category.icon)
-                        .font(.system(size: 28))
-                        .foregroundStyle(.white)
-                }
+                PolicyIconView(policy: policy, size: 60, cornerRadius: 14)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(policy.displayName)
                         .font(.title3)

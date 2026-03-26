@@ -10,15 +10,7 @@ struct PolicyRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Category icon
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(policy.category.color.gradient)
-                    .frame(width: 44, height: 44)
-                Image(systemName: policy.category.icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white)
-            }
+            PolicyIconView(policy: policy)
 
             // Policy info
             VStack(alignment: .leading, spacing: 3) {
