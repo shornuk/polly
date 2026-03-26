@@ -34,7 +34,11 @@ struct PolicyRowView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                if let days = policy.daysUntilRenewal {
+                if policy.isUpcoming, let days = policy.daysUntilStart {
+                    startsBadge(days: days)
+                } else if policy.isExpired, let days = policy.daysUntilRenewal {
+                    expiredBadge(daysAgo: abs(days))
+                } else if let days = policy.daysUntilRenewal {
                     renewalBadge(days: days)
                 }
             }
@@ -56,15 +60,11 @@ struct PolicyRowView: View {
         .padding(.vertical, 4)
     }
 
-    // MARK: - Renewal Badge
+    // MARK: - Badges
 
     @ViewBuilder
     private func renewalBadge(days: Int) -> some View {
-        if days < 0 {
-            Text("Overdue")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        } else if days == 0 {
+        if days == 0 {
             Text("Renews today")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -72,12 +72,42 @@ struct PolicyRowView: View {
             Text("Renews tomorrow")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-        } else if days <= 30 {
+        } else if days > 1 {
             Text("Renews in \(days) days")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-        } else if days <= 90 {
-            Text("Renews in \(days) days")
+        }
+    }
+
+    @ViewBuilder
+    private func startsBadge(days: Int) -> some View {
+        if days == 0 {
+            Text("Starts today")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else if days == 1 {
+            Text("Starts tomorrow")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else {
+            Text("Starts in \(days) days")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func expiredBadge(daysAgo: Int) -> some View {
+        if daysAgo == 0 {
+            Text("Expired today")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else if daysAgo == 1 {
+            Text("Expired yesterday")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        } else {
+            Text("Expired \(daysAgo) days ago")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

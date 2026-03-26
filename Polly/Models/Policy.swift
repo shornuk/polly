@@ -97,6 +97,16 @@ final class Policy {
         ).day
     }
 
+    /// Days until start date — nil if no start date set
+    var daysUntilStart: Int? {
+        guard let startDate else { return nil }
+        return Calendar.current.dateComponents(
+            [.day],
+            from: Calendar.current.startOfDay(for: Date()),
+            to: Calendar.current.startOfDay(for: startDate)
+        ).day
+    }
+
     /// Whether the policy is due for renewal within a given number of days
     func isDueForRenewal(within days: Int) -> Bool {
         guard let daysUntilRenewal else { return false }
@@ -118,5 +128,12 @@ final class Policy {
         guard isActive else { return false }
         guard let startDate else { return false }
         return startDate > Calendar.current.startOfDay(for: Date())
+    }
+
+    /// True when the policy is active but its renewal date has passed
+    var isExpired: Bool {
+        guard isActive else { return false }
+        guard let renewalDate else { return false }
+        return renewalDate < Calendar.current.startOfDay(for: Date())
     }
 }

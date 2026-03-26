@@ -4,11 +4,14 @@
 //
 
 import SwiftUI
+import SwiftData
 import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject private var notificationManager: NotificationManager
+    @Environment(\.modelContext) private var modelContext
     @State private var showingTestConfirmation = false
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -52,6 +55,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: - Debug
+                #if DEBUG
                 Section {
                     Button {
                         scheduleTestNotification()
@@ -59,11 +63,17 @@ struct SettingsView: View {
                     } label: {
                         Label("Send Test Notification", systemImage: "bell.badge")
                     }
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Delete All Data", systemImage: "trash")
+                    }
                 } header: {
                     Text("Debug")
                 } footer: {
                     Text("Sends a test notification in 10 seconds. Background the app to see it.")
                 }
+                #endif
 
                 // MARK: - About
                 Section("About") {
@@ -77,6 +87,18 @@ struct SettingsView: View {
             } message: {
                 Text("Background the app now. A notification will arrive in 10 seconds.")
             }
+            #if DEBUG
+            .confirmationDialog(
+                "Delete All Data?",
+                isPresented: $showingDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Everything", role: .destructive) { deleteAllData() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all policies, documents, and history. This cannot be undone.")
+            }
+            #endif
         }
     }
 
@@ -87,6 +109,20 @@ struct SettingsView: View {
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
         return "\(version) (\(build))"
     }
+
+    // MARK: - Delete All Data
+
+    #if DEBUG
+    private func deleteAllData() {
+        try? modelContext.delete(model: Policy.self)
+        try? modelContext.delete(model: PolicyCostRecord.self)
+        try? modelContext.delete(model: PolicyDocument.self)
+        try? modelContext.delete(model: Driver.self)
+        try? modelContext.delete(model: Vehicle.self)
+        try? modelContext.delete(model: InsuredProperty.self)
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+    #endif
 
     // MARK: - Test Notification
 

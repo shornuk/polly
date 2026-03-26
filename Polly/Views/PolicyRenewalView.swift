@@ -153,6 +153,21 @@ struct PolicyRenewalView: View {
             return nil
         }()
 
+        let newPolicy = Policy(
+            nickname: policy.nickname,
+            category: policy.category,
+            provider: provider.trimmingCharacters(in: .whitespaces),
+            energyType: policy.energyType,
+            accountNumber: accountNumber.trimmingCharacters(in: .whitespaces).isEmpty
+                ? nil : accountNumber.trimmingCharacters(in: .whitespaces),
+            startDate: startDate,
+            renewalDate: renewalDate,
+            autoRenews: policy.autoRenews,
+            reminderEnabled: policy.reminderEnabled,
+            reminderDaysBefore: policy.reminderDaysBefore,
+            notes: policy.notes
+        )
+
         let record = PolicyCostRecord(
             cost: costValue,
             frequency: frequency,
@@ -160,17 +175,11 @@ struct PolicyRenewalView: View {
             effectiveFrom: startDate,
             note: "Renewal"
         )
-        policy.costRecords.append(record)
+        newPolicy.costRecords.append(record)
+        modelContext.insert(newPolicy)
 
-        policy.provider = provider.trimmingCharacters(in: .whitespaces)
-        policy.accountNumber = accountNumber.trimmingCharacters(in: .whitespaces).isEmpty
-            ? nil : accountNumber.trimmingCharacters(in: .whitespaces)
-        policy.startDate = startDate
-        policy.renewalDate = renewalDate
-        policy.updatedAt = Date()
-
-        if policy.reminderEnabled {
-            notificationManager.scheduleReminder(for: policy)
+        if newPolicy.reminderEnabled {
+            notificationManager.scheduleReminder(for: newPolicy)
         }
 
         dismiss()

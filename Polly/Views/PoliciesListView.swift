@@ -9,6 +9,7 @@ import SwiftData
 private enum PolicyFilter: String, CaseIterable {
     case active   = "Active"
     case upcoming = "Upcoming"
+    case expired  = "Expired"
     case archived = "Archived"
 }
 
@@ -22,9 +23,11 @@ struct PoliciesListView: View {
         let filtered: [Policy]
         switch filter {
         case .active:
-            filtered = allPolicies.filter { $0.isActive && !$0.isUpcoming }
+            filtered = allPolicies.filter { $0.isActive && !$0.isUpcoming && !$0.isExpired }
         case .upcoming:
             filtered = allPolicies.filter { $0.isUpcoming }
+        case .expired:
+            filtered = allPolicies.filter { $0.isExpired }
         case .archived:
             filtered = allPolicies.filter { !$0.isActive }
         }
@@ -131,6 +134,7 @@ struct PoliciesListView: View {
         switch filter {
         case .active:   return "list.bullet.rectangle"
         case .upcoming: return "calendar.badge.clock"
+        case .expired:  return "clock.badge.xmark"
         case .archived: return "archivebox"
         }
     }
@@ -139,6 +143,7 @@ struct PoliciesListView: View {
         switch filter {
         case .active:   return "No Active Policies"
         case .upcoming: return "No Upcoming Policies"
+        case .expired:  return "No Expired Policies"
         case .archived: return "No Archived Policies"
         }
     }
@@ -149,6 +154,8 @@ struct PoliciesListView: View {
             return "Add your household bills and policies\nto keep track of renewals and costs."
         case .upcoming:
             return "Policies you've renewed in advance will appear here\nuntil their start date arrives."
+        case .expired:
+            return "Policies whose renewal date has passed will appear here.\nArchive them once you're done."
         case .archived:
             return "Policies you archive will appear here.\nYou can restore them at any time."
         }

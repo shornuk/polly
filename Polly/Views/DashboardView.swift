@@ -28,7 +28,7 @@ struct DashboardView: View {
     @Query private var allPolicies: [Policy]
 
     private var activePolicies: [Policy] {
-        allPolicies.filter { $0.isActive && !$0.isUpcoming }
+        allPolicies.filter { $0.isActive && !$0.isUpcoming && !$0.isExpired }
     }
 
     private var overduePolicies: [Policy] {
