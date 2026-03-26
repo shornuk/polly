@@ -133,7 +133,7 @@ struct PolicyDetailView: View {
         List {
             headerSection
             costSection
-            costHistorySection
+
             detailsSection
             remindersSection
             notesSection
@@ -159,7 +159,7 @@ struct PolicyDetailView: View {
                     Text(policy.displayName)
                         .font(.title3)
                         .fontWeight(.semibold)
-                    Text(policy.provider)
+                    Text(policy.category.rawValue)
                         .foregroundStyle(.secondary)
                     if let energyType = policy.energyType {
                         Text(energyType.rawValue)
@@ -260,85 +260,6 @@ struct PolicyDetailView: View {
     // MARK: - Cost History Section
 
     @ViewBuilder
-    private var costHistorySection: some View {
-        if policy.costRecords.count > 1 || entitlements.isPremium {
-            Section("Cost History") {
-                if !entitlements.isPremium {
-                    Label("Unlock premium to view full cost history", systemImage: "lock.fill")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
-                } else {
-                    let history = sortedCostHistory
-                    ForEach(Array(history.enumerated()), id: \.element.id) { index, record in
-                        costHistoryRow(record, isCurrent: index == 0, previous: index + 1 < history.count ? history[index + 1] : nil)
-                    }
-                }
-            }
-        }
-    }
-
-    private var sortedCostHistory: [PolicyCostRecord] {
-        policy.costRecords.sorted { $0.effectiveFrom > $1.effectiveFrom }
-    }
-
-    private func costHistoryRow(_ record: PolicyCostRecord, isCurrent: Bool, previous: PolicyCostRecord?) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(record.effectiveFrom.formatted(.dateTime.month(.abbreviated).year()))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    if isCurrent {
-                        Text("Current")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(policy.category.color)
-                            .clipShape(Capsule())
-                    }
-                }
-                Text(record.frequency.rawValue)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let note = record.note, !note.isEmpty {
-                    Text(note)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(record.cost, format: .currency(code: "GBP"))
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text(record.calculatedAnnualCost, format: .currency(code: "GBP"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let previous {
-                    changeBadge(from: previous.calculatedAnnualCost, to: record.calculatedAnnualCost)
-                }
-            }
-        }
-        .padding(.vertical, 2)
-    }
-
-    @ViewBuilder
-    private func changeBadge(from old: Decimal, to new: Decimal) -> some View {
-        if old != 0 {
-            let pct = ((new - old) / old * 100)
-            let increased = new > old
-            let formatted = abs(pct).formatted(.number.precision(.fractionLength(1)))
-            Text("\(increased ? "▲" : "▼") \(formatted)%")
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundStyle(increased ? .red : .green)
-        }
-    }
-
     // MARK: - Archive Section
 
     private var archiveSection: some View {
