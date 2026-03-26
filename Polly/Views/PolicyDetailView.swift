@@ -138,7 +138,7 @@ struct PolicyDetailView: View {
             remindersSection
             notesSection
             documentsSection
-            archiveSection
+            if policy.isActive { archiveSection }
         }
     }
 
