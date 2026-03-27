@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "provider-admiral 1.png",
+      "filename" : "provider-bt.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "provider-admiral@2x.png",
+      "filename" : "provider-bt@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "provider-admiral@3x.png",
+      "filename" : "provider-bt@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

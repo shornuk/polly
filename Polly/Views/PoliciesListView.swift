@@ -19,6 +19,11 @@ struct PoliciesListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allPolicies: [Policy]
 
+    /// True when showing the primary segmented views (Active / Upcoming)
+    private var isPrimaryFilter: Bool {
+        filter == .active || filter == .upcoming
+    }
+
     private var policies: [Policy] {
         let filtered: [Policy]
         switch filter {
@@ -37,14 +42,15 @@ struct PoliciesListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("Filter", selection: $filter) {
-                    ForEach(PolicyFilter.allCases, id: \.self) { tab in
-                        Text(tab.rawValue).tag(tab)
+                if isPrimaryFilter {
+                    Picker("Filter", selection: $filter) {
+                        Text("Active").tag(PolicyFilter.active)
+                        Text("Upcoming").tag(PolicyFilter.upcoming)
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
 
                 if policies.isEmpty {
                     emptyState
@@ -53,18 +59,46 @@ struct PoliciesListView: View {
                     list
                 }
             }
-            .navigationTitle("Policies")
+            .navigationTitle(isPrimaryFilter ? "Policies" : filter.rawValue)
             #if !os(macOS)
             .navigationBarTitleDisplayMode(.large)
             #endif
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    if filter == .active {
+                // Leading: Done button when viewing Expired/Archived
+                if !isPrimaryFilter {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") {
+                            filter = .active
+                        }
+                    }
+                }
+
+                // Trailing: Add button
+                if filter == .active {
+                    ToolbarItem(placement: .primaryAction) {
                         Button {
                             showingAddSheet = true
                         } label: {
                             Label("Add Policy", systemImage: "plus")
                         }
+                    }
+                }
+
+                // Trailing: Overflow menu
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Button {
+                            filter = .expired
+                        } label: {
+                            Label("Expired", systemImage: "clock.badge.xmark")
+                        }
+                        Button {
+                            filter = .archived
+                        } label: {
+                            Label("Archived", systemImage: "archivebox")
+                        }
+                    } label: {
+                        Label("More", systemImage: "ellipsis")
                     }
                 }
             }
